@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pookie Countdown to Oct 24!</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffe0f7 0%, #b6eaff 100%);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      color: #6d2c7c;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .pookie-header {
+      font-size: 2.5em;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 0 #fff6f9, 0 0 10px #ffb3e6;
+    }
+    .countdown {
+      font-size: 2em;
+      margin-bottom: 30px;
+      background: #fff6f9;
+      display: inline-block;
+      padding: 20px 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px #e0b3ff55;
+    }
+    .mini-games {
+      margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+    }
+    .game-card {
+      background: #fff6f9;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px #e0b3ff55;
+      padding: 24px 18px;
+      width: 320px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .game-title {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+      color: #ff69b4;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .pookie-img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      border: 3px solid #ffb3e6;
+      background: #fff;
+      object-fit: cover;
+    }
+    button {
+      background: #ffb3e6;
+      color: #6d2c7c;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      margin: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #ff69b4;
+      color: #fff;
+    }
+    .score {
+      font-size: 1.1em;
+      margin-top: 8px;
+      color: #6d2c7c;
+    }
+    .pookie-emoji {
+      font-size: 2.5em;
+      margin-bottom: 8px;
+    }
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 50px);
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .memory-card {
+      width: 50px;
+      height: 50px;
+      background: #ffe0f7;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      cursor: pointer;
+      border: 2px solid #ffb3e6;
+      user-select: none;
+    }
+    .memory-card.flipped {
+      background: #ffb3e6;
+    }
+    .whack-pookie-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .whack-cell {
+      width: 60px;
+      height: 60px;
+      background: #ffe0f7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      cursor: pointer;
+      border: 2px solid #ffb3e6;
+      transition: background 0.1s;
+    }
+    .whack-cell.active {
+      background: #ffb3e6;
+    }
+    .guess-input {
+      font-size: 1em;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ffb3e6;
+      margin-bottom: 8px;
+      width: 60px;
+      text-align: center;
+    }
+    @media (max-width: 900px) {
+      .mini-games {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="pookie-header">
+    🧸 Countdown to Your Birthday Harsha Vinodhini! 🧸
+  </div>
+  <div class="countdown" id="countdown"></div>
+
+  <div class="mini-games">
+    <!-- Memory Game -->
+    <div class="game-card" id="memory-game">
+      <div class="game-title">Brain Iruntha than Aada mudium</div>
+      <div class="pookie-emoji">🧸</div>
+      <div class="memory-grid" id="memory-grid"></div>
+      <div class="score" id="memory-score"></div>
+      <button onclick="resetMemoryGame()">Restart</button>
+    </div>
+    <!-- Whack-a-Pookie -->
+    <div class="game-card" id="whack-game">
+      <div class="game-title">Talent Venummmmm</div>
+      <div class="pookie-emoji">🐻</div>
+      <div class="whack-pookie-grid" id="whack-grid"></div>
+      <div class="score" id="whack-score"></div>
+      <button onclick="startWhackGame()">Start</button>
+      <button onclick="stopWhackGame()">Stop</button>
+    </div>
+    <!-- Guess the Number -->
+    <div class="game-card" id="guess-game">
+      <div class="game-title">Number solluuuuu</div>
+      <div class="pookie-emoji">🎲</div>
+      <input class="guess-input" id="guess-input" type="number" min="1" max="50" placeholder="1-50">
+      <button onclick="submitGuess()">Guess</button>
+      <div class="score" id="guess-message"></div>
+      <button onclick="resetGuessGame()">Restart</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Countdown Timer ---
+    function updateCountdown() {
+      const target = new Date(new Date().getFullYear(), 9, 24, 0, 0, 0); // Oct is month 9 (0-based)
+      const now = new Date();
+      let diff = target - now;
+      if (diff < 0) {
+        document.getElementById('countdown').innerHTML = "🎉 It's Pookie Day! 🎉";
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      diff -= days * (1000 * 60 * 60 * 24);
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      diff -= hours * (1000 * 60 * 60);
+      const mins = Math.floor(diff / (1000 * 60));
+      diff -= mins * (1000 * 60);
+      const secs = Math.floor(diff / 1000);
+      document.getElementById('countdown').innerHTML =
+        `<b>${days}</b> days <b>${hours}</b> hours <b>${mins}</b> minutes <b>${secs}</b> seconds left until <span style="color:#ff69b4">Oct 24</span>!`;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // --- Pookie Memory Match Game ---
+    const pookieEmojis = ['🧸','🐻','💖','🍪','🌸','🎀','🦄','🍯'];
+    let memoryCards = [];
+    let memoryFlipped = [];
+    let memoryMatched = [];
+    let memoryScore = 0;
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+    function setupMemoryGame() {
+      memoryCards = shuffle([...pookieEmojis, ...pookieEmojis]);
+      memoryFlipped = [];
+      memoryMatched = [];
+      memoryScore = 0;
+      renderMemoryGrid();
+      document.getElementById('memory-score').textContent = '';
+    }
+    function renderMemoryGrid() {
+      const grid = document.getElementById('memory-grid');
+      grid.innerHTML = '';
+      memoryCards.forEach((emoji, idx) => {
+        const card = document.createElement('div');
+        card.className = 'memory-card' + (memoryFlipped.includes(idx) || memoryMatched.includes(idx) ? ' flipped' : '');
+        card.textContent = (memoryFlipped.includes(idx) || memoryMatched.includes(idx)) ? emoji : '❓';
+        card.onclick = () => flipMemoryCard(idx);
+        grid.appendChild(card);
+      });
+    }
+    function flipMemoryCard(idx) {
+      if (memoryFlipped.length === 2 || memoryFlipped.includes(idx) || memoryMatched.includes(idx)) return;
+      memoryFlipped.push(idx);
+      renderMemoryGrid();
+      if (memoryFlipped.length === 2) {
+        setTimeout(() => {
+          const [i, j] = memoryFlipped;
+          if (memoryCards[i] === memoryCards[j]) {
+            memoryMatched.push(i, j);
+            memoryScore++;
+            document.getElementById('memory-score').textContent = `Matches: ${memoryScore}`;
+            if (memoryMatched.length === memoryCards.length) {
+              document.getElementById('memory-score').textContent = `🎉 All matched! Pookie is proud! 🎉`;
+            }
+          }
+          memoryFlipped = [];
+          renderMemoryGrid();
+        }, 700);
+      }
+    }
+    function resetMemoryGame() {
+      setupMemoryGame();
+    }
+    setupMemoryGame();
+
+    // --- Whack-a-Pookie Game ---
+    let whackActive = false;
+    let whackScore = 0;
+    let whackTimer = null;
+    let whackPookieIdx = -1;
+    function renderWhackGrid() {
+      const grid = document.getElementById('whack-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'whack-cell' + (i === whackPookieIdx ? ' active' : '');
+        cell.innerHTML = i === whackPookieIdx ? '🧸' : '';
+        cell.onclick = () => {
+          if (i === whackPookieIdx && whackActive) {
+            whackScore++;
+            document.getElementById('whack-score').textContent = `Score: ${whackScore}`;
+            whackPookieIdx = -1;
+            renderWhackGrid();
+          }
+        };
+        grid.appendChild(cell);
+      }
+    }
+    function whackLoop() {
+      if (!whackActive) return;
+      whackPookieIdx = Math.floor(Math.random() * 9);
+      renderWhackGrid();
+      whackTimer = setTimeout(whackLoop, 800);
+    }
+    function startWhackGame() {
+      whackActive = true;
+      whackScore = 0;
+      document.getElementById('whack-score').textContent = `Score: 0`;
+      whackLoop();
+    }
+    function stopWhackGame() {
+      whackActive = false;
+      clearTimeout(whackTimer);
+      whackPookieIdx = -1;
+      renderWhackGrid();
+      document.getElementById('whack-score').textContent += " | Game stopped!";
+    }
+    renderWhackGrid();
+
+    // --- Pookie's Secret Number (Guess the Number) ---
+    let secretNumber = 0;
+    let guessTries = 0;
+    function resetGuessGame() {
+      secretNumber = Math.floor(Math.random() * 50) + 1;
+      guessTries = 0;
+      document.getElementById('guess-message').textContent = '';
+      document.getElementById('guess-input').value = '';
+    }
+    function submitGuess() {
+      const val = parseInt(document.getElementById('guess-input').value, 10);
+      if (isNaN(val) || val < 1 || val > 50) {
+        document.getElementById('guess-message').textContent = "Enter a number between 1 and 50!";
+        return;
+      }
+      guessTries++;
+      if (val === secretNumber) {
+        document.getElementById('guess-message').textContent = `🎉 Correct! Pookie's number was ${secretNumber}. Tries: ${guessTries}`;
+      } else if (val < secretNumber) {
+        document.getElementById('guess-message').textContent = "Too low! Try again, pookie!";
+      } else {
+        document.getElementById('guess-message').textContent = "Too high! Try again, pookie!";
+      }
+    }
+    resetGuessGame();
+  </script>
+</body>
+</html>
